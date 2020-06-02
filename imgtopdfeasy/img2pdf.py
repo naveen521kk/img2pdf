@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 def img2pdf(input,output,extension):
     from PIL import Image
     from pathlib import Path
@@ -13,7 +14,7 @@ def img2pdf(input,output,extension):
     im1=im.convert('RGB')
     im1.save(output+'.pdf',save_all=True,append_images=imagelist[1:])
     return 'Sucessfully saved at '+outputPath+'.pdf'
-if __name__ == "__main__":
+def parse_cli():
     import argparse
     parser=argparse.ArgumentParser()
     parser.add_argument('-i','--input',help='Input file folder full path. \n Realtive or abosolute',required=True)
