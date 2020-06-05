@@ -13,7 +13,7 @@ def img2pdf(input,output,extension):
         break
     im1=im.convert('RGB')
     im1.save(output+'.pdf',save_all=True,append_images=imagelist[1:])
-    return 'Sucessfully saved at '+outputPath+'.pdf'
+    return 'Sucessfully saved at '+output+'.pdf'
 def parse_cli():
     import argparse
     parser=argparse.ArgumentParser()
