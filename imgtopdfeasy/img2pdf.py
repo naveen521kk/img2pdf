@@ -14,6 +14,18 @@ def img2pdf(input,output,extension):
     im1=im.convert('RGB')
     im1.save(output+'.pdf',save_all=True,append_images=imagelist[1:])
     return 'Sucessfully saved at '+output+'.pdf'
+def convertToPageSize(imgPath,height,width):
+    '''This converts the image so same size as specified. It doesn't scale it but creates a white background on it.
+    A white background on which the image is pasted.
+    '''
+    from PIL import Image
+    whiteBackground=Image.new('RGB',(height,width),color="#fff")
+    mainImage=Image.open(imgPath)
+    mainImageWidth,mainImageHeight=mainImage.size[0],mainImage.size[1]
+    if height>mainImageHeight:
+        pass
+    whiteBackground.save(r"E:\hello.jpg")
+    whiteBackground.show()
 def parse_cli():
     import argparse
     parser=argparse.ArgumentParser()
@@ -25,3 +37,4 @@ def parse_cli():
     outputPath=args.output
     extension=args.extension
     print(img2pdf(inputPath,outputPath,extension))
+convertToPageSize(1000,1000)
