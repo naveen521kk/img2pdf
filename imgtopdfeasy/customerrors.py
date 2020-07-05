@@ -1,0 +1,2 @@
+class ImageSizeTooSmall(Exception):
+    pass
