@@ -19,13 +19,13 @@ jobs:
       with:
         python-version: '3.x'
     - name: Install dependencies and Poetry
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_KEY }}
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-    - name: Build and publish
-      env:
-        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_KEY }}
-      run: |
         poetry build
         poetry publish
+
+
