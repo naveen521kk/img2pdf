@@ -7,25 +7,15 @@ on:
   push:
     tags:
       - 'v*.*.*'
+    branches:
+        - master
 jobs:
-  deploy:
-
+  build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Build and publish to pypi
+      uses: JRubics/poetry-publish@v1
       with:
-        python-version: '3.x'
-    - name: Install dependencies and Poetry
-      env:
-        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_KEY }}
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-        poetry build
-        poetry publish
-
+        pypi_token:  ${{ secrets.PYPI_API_KEY }}
 
