@@ -8,10 +8,15 @@ Has the following function:
 """
 from pathlib import Path
 from PIL import Image
-from customerrors import ImageSizeTooSmall
+from .customerrors import ImageSizeTooSmall
+import os
+import platform
+import subprocess
 
 
-def img2pdf(input, output, extension):
+def img2pdf(
+    input, output, extension, have_border=False, border_color="white", border_size=10
+):
     """This function convert images to PDF of sepcific extension and saves in specific location.
     Parameters
     ----------
@@ -22,6 +27,14 @@ def img2pdf(input, output, extension):
     extension : str
         The extension for Images to search for. Supports the images supported by Pillow.
         Eg. `jpeg`,`png etc.
+    have_border : bool
+        Whether the images need to have border have border or not. Useful for differet size images.
+        Defaults to False
+    border_color: str
+        The hexcodes of colour you want as border colour. This needs to be Parsed by Pillow.
+        Default to white.
+    border_size: int
+        This is the size of border on one side of the page. Defaults to 10
 
     Returns
     -------
@@ -34,46 +47,66 @@ def img2pdf(input, output, extension):
     Examples
     --------
     >>> imgtopdfeasy.img2pdf.img2pdf(r"D:\Chemistry\Chemistry",r"D:\chemistrydemo","jpeg")
-    D:\Chemistry\Chemistry\1.jpeg
-    D:\Chemistry\Chemistry\2.jpeg
-    D:\Chemistry\Chemistry\3.jpeg
-    D:\Chemistry\Chemistry\4.jpeg
-    D:\Chemistry\Chemistry\5.jpeg
-    D:\Chemistry\Chemistry\6.jpeg
-    D:\Chemistry\Chemistry\7.jpeg
+    Found Image at: D:\Chemistry\Chemistry\1.jpeg
+    Found Image at: D:\Chemistry\Chemistry\2.jpeg
+    Found Image at: D:\Chemistry\Chemistry\3.jpeg
+    Found Image at: D:\Chemistry\Chemistry\4.jpeg
+    Found Image at: D:\Chemistry\Chemistry\5.jpeg
+    Found Image at: D:\Chemistry\Chemistry\6.jpeg
+    Found Image at:D:\Chemistry\Chemistry\7.jpeg
     'Sucessfully saved at D:\\chemistrydemo.pdf'
 
     """
-    imagelist = []
+    imageDict = {}
+    image_count = 0
     for path in Path(input).rglob("*." + extension):
         if path == None:
             raise FileNotFoundError("NO files with Specified extension in the folder")
         im = Image.open(path)
         im1 = im.convert("RGB")
-        imagelist.append(im1)
-        print(path)
-    for path in Path(input).rglob("*." + extension):
-        im = Image.open(path)
-        break
+        imageDict[image_count] = [im1, im1.size]
+        image_count += 1
+        print("Found Image at: ", path)
+
+    maxImageWidth, maxImageHeight = (
+        max([i[1][0] for i in imageDict.values()]),
+        max([i[1][1] for i in imageDict.values()]),
+    )
+    imagelist = []
+    if have_border:
+        for image_nums in imageDict:
+            imagelist.append(
+                convertToPageSize(
+                    imageDict[image_nums][0],
+                    maxImageHeight + (border_size * 2 + 1),
+                    maxImageWidth + (border_size * 2 + 1),
+                    border_size,
+                    border_color,
+                )
+            )
+    else:
+        for image_nums in imageDict:
+            imagelist.append(imageDict[image_nums][0])
+    im = imagelist[0]
     im1 = im.convert("RGB")
     im1.save(output + ".pdf", save_all=True, append_images=imagelist[1:])
     return "Sucessfully saved at " + output + ".pdf"
 
 
-def convertToPageSize(imgPath, height, width, border, bgColor):
+def convertToPageSize(mainImage, height, width, border, bgColor):
     """This converts the image so same size as specified. It doesn't scale it but creates a white background on it.
     A white background on which the image is pasted.
 
     Parameters
     ----------
-    imgPath : path
-        Location of Image which need background.
+    mainImage : PIL.Image.Image
+        An Image Object from Pillow
     height : int
         Height in px.  As PIL standard.
     width : int
-        Width in px. As PIL standard
+        Width in px. As PIL standard.
     border : int
-        Border width of the image.
+        Border width of the image on one side.
     bgColor : ColorHex
         Colour of background.
 
@@ -84,7 +117,6 @@ def convertToPageSize(imgPath, height, width, border, bgColor):
     """
 
     whiteBackground = Image.new("RGB", (width, height), color=bgColor)
-    mainImage = Image.open(imgPath)
     mainImageWidth, mainImageHeight = mainImage.size[0], mainImage.size[1]
     if (
         height - 2 * (border) > mainImageHeight
@@ -110,7 +142,11 @@ def parse_cli():
     """
     import argparse
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        prog="img2pdf",
+        description="Converts Images To Pdf",
+        epilog="Made with ❤ By Naveen",
+    )
     parser.add_argument(
         "-i",
         "--input",
@@ -123,15 +159,42 @@ def parse_cli():
     parser.add_argument(
         "-ext", "--extension", help="File extension of image to add.", required=True
     )
+    parser.add_argument(
+        "--border", help="Add border to Images", required=False, action="store_true"
+    )
+    parser.add_argument(
+        "--border_size", help="Size of border of Images", required=False,
+    )
+    parser.add_argument(
+        "--border_color", help="Colour of Border of Images", required=False,
+    )
     args = parser.parse_args()
     inputPath = args.input
     outputPath = args.output
     extension = args.extension
-    print(img2pdf(inputPath, outputPath, extension))
-
-
-print(
-    convertToPageSize(
-        r"C:\Users\Naveen User\Desktop\tribonacci.png", 800, 800, 200, "#000"
+    have_border = args.border
+    border_size = int(args.border_size)
+    border_color = args.border_color
+    print(
+        img2pdf(
+            inputPath, outputPath, extension, have_border, border_color, border_size
+        )
     )
-)
+    outputPath = outputPath + ".pdf"
+    current_os = platform.system()
+    if current_os == "Windows":
+        os.startfile(outputPath)
+    else:
+        commands = []
+        if current_os == "Linux":
+            commands.append("xdg-open")
+        elif current_os.startswith("CYGWIN"):
+            commands.append("cygstart")
+        else:  # Assume macOS
+            commands.append("open")
+        commands.append("-R")
+        commands.append(outputPath)
+        # commands.append("-g")
+        FNULL = open(os.devnull, "w")
+        subprocess.call(commands, stdout=FNULL, stderr=sp.STDOUT)
+        FNULL.close()
