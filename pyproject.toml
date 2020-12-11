@@ -16,7 +16,7 @@ Pillow = "^7.1.2"
 "img2pdf" = "imgtopdfeasy:main"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^6.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
