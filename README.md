@@ -1,4 +1,7 @@
 # Img2pdf [![GitHub license](https://img.shields.io/github/license/naveen521kk/img2pdf)](https://github.com/naveen521kk/img2pdf/blob/master/LICENSE) [![GitHub stars](https://img.shields.io/github/stars/naveen521kk/img2pdf)](https://github.com/naveen521kk/img2pdf/stargazers)[![](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+# This project is abandoned and will not be updated
+
 This is command line utility to convert images in a directory to  PDF file.
 
 This is very simple CLI to convert images in a directory to a PDF file. This use Pillow( PIL ), to achieve this.
